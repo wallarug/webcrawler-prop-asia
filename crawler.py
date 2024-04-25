@@ -88,11 +88,11 @@ def main():
     entries = []
 
     # search for all blog posts in range 1 to 10,000 until no more blog posts are found (404 error)
-    for i in range(1, 5000):
+    for i in range(2110, 5000):
         url = f'https://propertycloud.asia/news/{i}'
         r = requests.get(url)
         if r.status_code == 404:
-            break
+            continue
 
         # search for keyword in the blog post - replace 'keyword' with the actual keyword
         if 'Mangioni Property' in r.text:
@@ -101,7 +101,7 @@ def main():
             title, published_date, author, tags, document_url = parse_html(r.text)
             entry = Entry(url, title, published_date, author, tags, document_url)
             entries.append(entry)
-            print(str(i) + " " + entry)
+            print(entry)
             # download the document
             #entry.download_document(f'docs/{entry.id}.pdf')
         else:
