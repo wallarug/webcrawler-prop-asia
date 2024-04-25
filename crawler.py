@@ -48,26 +48,38 @@ def parse_html(html):
     # extract the title
     title = html[start_index:end_index]
 
-    ## PUBLISHED DATE - 1st part of the meta block ("Published on" date)
+    ## META BLOCK
     meta_start_index = html.find('<ul class="post-meta">')
-    # find the end of the ul block (nearby)
     meta_end_index = html.find('</ul>', meta_start_index)
 
-    # find the end of the date (nearby) - before </a>
-    end_index = html.find('</a>', meta_start_index, meta_end_index)
-    # search for the ">" before the date
-    start_index = html.rfind('>', meta_start_index, end_index)
-    # extract the date
+    ## PUBLISHED DATE - 1st part of the meta block ("Published on" date)
+    # find the text "Published on" in the meta block, then do a fine grained search for the date
+    published_index = html.find('Published on', meta_start_index, meta_end_index)
+    start_index = html.find('>', published_index)
+    end_index = html.find('</', start_index)
     published_date = html[start_index:end_index]
+    
+    ## AUTHOR - 2nd part of the meta block ("Written by" author)
+    # find the text "Written by" in the meta block, then do a fine grained search for the date
+    author_index = html.find('Written by', meta_start_index, meta_end_index)
+    start_index = html.find('>', author_index)
+    end_index = html.find('</', start_index)
+    author = html[start_index:end_index]
 
-    ## AUTHOR - 2nd part of the meta block
-    # find the end of the author (nearby) - before </a>
+    ## TAGS - 3rd part of the meta block ("Tagged as" tags)
+    # find the text "Tagged as" in the meta block, then do a fine grained search for the date
+    tags_index = html.find('Tagged as', meta_start_index, meta_end_index)
+    start_index = html.find('>', tags_index)
+    end_index = html.find('</', start_index)
+    tags = html[start_index:end_index]
 
+    ## DOCUMENT URL - find the text "Document: " after meta block and extract from a href tag
+    doc_index = html.find('Document:', meta_end_index)
+    start_index = html.find('href="', doc_index)
+    end_index = html.find('">', start_index + 6)
+    document_url = html[start_index + 6:end_index]
 
-
-
-    pass
-
+    return title, published_date, author, tags, document_url
 
 
 # main function
