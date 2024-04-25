@@ -34,11 +34,47 @@ class Entry:
             f.write(r.content)
     
 
+# HTML website parser (specific to the website)
+def parse_html(html):
+    # parse the HTML and return the data
+    
+    ## TITLE
+    # find <div class="post-title"> and extract the title from the h2 tag
+    pt_index = html.find('<div class="post-title">')
+    # find the end of the h2 block (nearby)
+    end_index = html.find('</h2>', pt_index)
+    # find the start of the title (nearby)
+    start_index = html.find(">" + 24, pt_index)
+    # extract the title
+    title = html[start_index:end_index]
+
+    ## PUBLISHED DATE - 1st part of the meta block ("Published on" date)
+    meta_start_index = html.find('<ul class="post-meta">')
+    # find the end of the ul block (nearby)
+    meta_end_index = html.find('</ul>', meta_start_index)
+
+    # find the end of the date (nearby) - before </a>
+    end_index = html.find('</a>', meta_start_index, meta_end_index)
+    # search for the ">" before the date
+    start_index = html.rfind('>', meta_start_index, end_index)
+    # extract the date
+    published_date = html[start_index:end_index]
+
+    ## AUTHOR - 2nd part of the meta block
+    # find the end of the author (nearby) - before </a>
+
+
+
+
+    pass
+
+
+
 # main function
 def main():
     # search for all blog posts in range 1 to 10,000 until no more blog posts are found (404 error)
-    for i in range(1, 10000):
-        url = f'https://www.example.com/blog/{i}'
+    for i in range(2110, 10000):
+        url = f'https://propertycloud.asia/news/{i}'
         r = requests.get(url)
         if r.status_code == 404:
             break
