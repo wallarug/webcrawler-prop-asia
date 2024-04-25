@@ -88,24 +88,24 @@ def main():
     entries = []
 
     # search for all blog posts in range 1 to 10,000 until no more blog posts are found (404 error)
-    for i in range(2110, 2119):
+    for i in range(1, 5000):
         url = f'https://propertycloud.asia/news/{i}'
         r = requests.get(url)
         if r.status_code == 404:
             break
 
         # search for keyword in the blog post - replace 'keyword' with the actual keyword
-        if 'keyword' in r.text:
+        if 'Mangioni Property' in r.text:
             # create a record for the blog post
-            print("Found keyword in", url)
+            #print("Found keyword in", url)
             title, published_date, author, tags, document_url = parse_html(r.text)
             entry = Entry(url, title, published_date, author, tags, document_url)
             entries.append(entry)
-            print(entry)
+            print(str(i) + " " + entry)
             # download the document
             #entry.download_document(f'docs/{entry.id}.pdf')
         else:
-            print("Keyword not found in", url)
+            print("Not found in: ", i)
 
     # save all records to a CSV file
     with open('entries.csv', 'w') as f:
