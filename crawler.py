@@ -44,9 +44,9 @@ def parse_html(html):
     # find the end of the h2 block (nearby)
     end_index = html.find('</h2>', pt_index)
     # find the start of the title (nearby)
-    start_index = html.find(">" + 24, pt_index)
+    start_index = html.find(">", pt_index + 24)
     # extract the title
-    title = html[start_index:end_index]
+    title = html[start_index+1:end_index]
 
     ## META BLOCK
     meta_start_index = html.find('<ul class="post-meta">')
@@ -57,21 +57,21 @@ def parse_html(html):
     published_index = html.find('Published on', meta_start_index, meta_end_index)
     start_index = html.find('>', published_index)
     end_index = html.find('</', start_index)
-    published_date = html[start_index:end_index]
+    published_date = html[start_index+1:end_index]
     
     ## AUTHOR - 2nd part of the meta block ("Written by" author)
     # find the text "Written by" in the meta block, then do a fine grained search for the date
     author_index = html.find('Written by', meta_start_index, meta_end_index)
     start_index = html.find('>', author_index)
     end_index = html.find('</', start_index)
-    author = html[start_index:end_index]
+    author = html[start_index+1:end_index]
 
     ## TAGS - 3rd part of the meta block ("Tagged as" tags)
     # find the text "Tagged as" in the meta block, then do a fine grained search for the date
     tags_index = html.find('Tagged as', meta_start_index, meta_end_index)
     start_index = html.find('>', tags_index)
     end_index = html.find('</', start_index)
-    tags = html[start_index:end_index]
+    tags = html[start_index+1:end_index]
 
     ## DOCUMENT URL - find the text "Document: " after meta block and extract from a href tag
     doc_index = html.find('Document:', meta_end_index)
@@ -84,8 +84,11 @@ def parse_html(html):
 
 # main function
 def main():
+    # storage for entries
+    entries = []
+
     # search for all blog posts in range 1 to 10,000 until no more blog posts are found (404 error)
-    for i in range(2110, 10000):
+    for i in range(2110, 2119):
         url = f'https://propertycloud.asia/news/{i}'
         r = requests.get(url)
         if r.status_code == 404:
@@ -94,7 +97,23 @@ def main():
         # search for keyword in the blog post - replace 'keyword' with the actual keyword
         if 'keyword' in r.text:
             # create a record for the blog post
-            entry = Entry(url, 'title', 'published_date', 'author', 'tags', 'document_url')
+            print("Found keyword in", url)
+            title, published_date, author, tags, document_url = parse_html(r.text)
+            entry = Entry(url, title, published_date, author, tags, document_url)
+            entries.append(entry)
             print(entry)
             # download the document
             #entry.download_document(f'docs/{entry.id}.pdf')
+        else:
+            print("Keyword not found in", url)
+
+    # save all records to a CSV file
+    with open('entries.csv', 'w') as f:
+        f.write('id,published_date,author,tags,document_url,url\n')
+        for entry in entries:
+            f.write(entry.csv_line() + '\n')
+
+
+if __name__ == '__main__':
+    main()
+    print("Completed.")
